@@ -4,54 +4,24 @@ using System.Text;
 
 namespace LR3
 {
-    class Literature
+    class Literature : Composition
     {
-        protected string title;
-        protected string author;
         protected int pages;
+        protected int year;
+        protected static DateTime nowYear = DateTime.Now;
 
-        public Literature(string title, string author, int pages)
+        public Literature(string title, string author, int pages, int year) :
+
+            base(title, author)
         {
-            this.title = title;
-            this.author = author;
+
             this.pages = pages;
+            this.year = year;
         }
 
-        public Literature() { }
-
-
-
-        public string Title
-        {
-            set
-            {
-                if (value.Length <= 0 || value.Length > 30)
-                {
-
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
-                {
-                    title = value;
-                }
-            }
-        }
-        public string Author
-        {
-            set
-            {
-                if (value.Length <= 0 || value.Length > 30)
-                {
-
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
-                {
-                    author = value;
-                }
-
-            }
-        }
+        public Literature() :
+            base()
+        { }
 
         public int Pages
         {
@@ -66,14 +36,29 @@ namespace LR3
                 {
                     pages = value;
                 }
-
             }
         }
 
-        public void DisplayInformWithPages(int i)
+        public int Year
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{i}. {title,-55} {author,-40} {pages,-10}");
+            set
+            {
+                if (value <= 1500 || value > nowYear.Year)
+                {
+
+                    Console.WriteLine("Input incorrect...");
+                }
+                else
+                {
+                    year = value;
+                }
+            }
+        }
+
+        public override void DisplayInform(int i)
+        {
+            Console.Write($"{i}. {title,-55} {author,-40} {pages,-10} {year,-10}");
         }
     }
 }
+
