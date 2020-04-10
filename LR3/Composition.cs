@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LR3
 {
@@ -19,14 +18,13 @@ namespace LR3
 
         public string Title
         {
+            get
+            {
+                return title;
+            }
             set
             {
-                if (value.Length <= 0 || value.Length > 30)
-                {
-
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
+                if (value.Length >= 0 || value.Length < 30)
                 {
                     title = value;
                 }
@@ -36,19 +34,14 @@ namespace LR3
         {
             set
             {
-                if (value.Length <= 0 || value.Length > 30)
+                if (value.Length >= 0 || value.Length < 30)
                 {
 
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
-                {
                     author = value;
                 }
-
             }
         }
 
-        abstract public void DisplayInform(int i);
+        abstract public override string ToString();
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LR3
 {
-    class Literature : Composition
+    class Literature : Composition, IComparable<Literature>
     {
         protected int pages;
         protected int year;
@@ -27,12 +27,7 @@ namespace LR3
         {
             set
             {
-                if (value <= 0 || value > 10000)
-                {
-
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
+                if (value >= 0 || value < 10000)
                 {
                     pages = value;
                 }
@@ -43,22 +38,16 @@ namespace LR3
         {
             set
             {
-                if (value <= 1500 || value > nowYear.Year)
-                {
-
-                    Console.WriteLine("Input incorrect...");
-                }
-                else
+                if (value > 1500 || value <= nowYear.Year)
                 {
                     year = value;
                 }
             }
         }
 
-        public override void DisplayInform(int i)
-        {
-            Console.Write($"{i}. {title,-55} {author,-40} {pages,-10} {year,-10}");
-        }
+        int IComparable<Literature>.CompareTo(Literature item) => this.Title.CompareTo(item.Title);
+
+        public override string ToString() => $"{title,-55} {author,-40} {pages,-10} {year,-10}";
     }
 }
 
