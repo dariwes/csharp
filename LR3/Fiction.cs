@@ -1,30 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LR3
 {
-    class Fiction : Literature, IComparable<Fiction>, IBook
+    class Fiction : Literature, IComparable<Fiction>
     {
         double rating;
 
         public Fiction(string title, string author, int pages, int year, double rating) :
             base(title, author, pages, year)
         { 
-            this.rating = rating; 
+            this.Rating = rating; 
         }
 
         public Fiction() : base() { }
 
         public double Rating
         {
-            get { return rating; }
+            get => rating;
             set
             {
-                if (value >= 0.0 || value <= 5.0)
+                if (value < 0.0 || value > 5.0)
                 {
-                    rating = value;
+                    throw new ArgumentNullException(Convert.ToString(value), 
+                        "Rating should be in the range from 0 to 5."); 
                 }
+
+                rating = value;
             }
         }
 
@@ -32,7 +33,7 @@ namespace LR3
 
         public override string ToString() => $"{title,-55} {author,-35} {pages,-10} {year,-10} {rating,-20}";
 
-        public decimal CalculateTheCost()
+        public override decimal CalculateTheCost()
         {
             decimal percent = (decimal)rating / 10M;
 

@@ -1,13 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
 namespace LR3
 {
-    class Science : Literature, IBook
+    class Science : Literature
     {
-        public string Language { get; set; }
+        private string language;
+        public string Language 
+        { 
+            get => Language; 
+            set
+            {
+                if (value == "rus" || value == "eng")
+                {
+                    language = value;
+                }
+                else
+                {
+                    throw new ArgumentNullException(value,
+                        "The language is entered incorrectly. You must enter \"rus\" or \"eng\".");
+                }
+            }
+        }
 
         public Science(string title, string author, int pages, int year, string language) :
             base(title, author, pages, year)
@@ -17,7 +30,7 @@ namespace LR3
 
         public Science() : base() { }
 
-        public override string ToString() => $"{title,-55} {author,-35} {pages,-10} {year,-10} {Language,-20}";
+        public override string ToString() => $"{title,-55} {author,-35} {pages,-10} {year,-10} {language,-20}";
 
         public string Timing()
         {
@@ -28,9 +41,9 @@ namespace LR3
             return $"{hours} hours {minutes} minutes.";
         }
 
-        public decimal CalculateTheCost()
+        public override decimal CalculateTheCost()
         {
-            decimal percent = (decimal)(nowYear.Year - year) / 10 + (Language == "rus" ? -0.1M : 0M);
+            decimal percent = (decimal)(nowYear.Year - year) / 10 + (language == "rus" ? -0.1M : 0M);
 
             if (percent <= 0M)
             {

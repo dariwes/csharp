@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace LR3
 {
@@ -10,35 +10,27 @@ namespace LR3
 
         public Composition(string title, string author)
         {
-            this.title = title;
-            this.author = author;
+            Title = title;
+            Author = author;
         }
 
         public Composition() { }
 
         public string Title
         {
-            get
-            {
-                return title;
-            }
-            set
-            {
-                if (value.Length >= 0 || value.Length < 30)
-                {
-                    title = value;
-                }
-            }
+            get => title;
+            set => title = value;
         }
         public string Author
         {
             set
             {
-                if (value.Length >= 0 || value.Length < 30)
+                if (!Regex.Match(value, "^[A-Z, a-z]").Success)
                 {
-
-                    author = value;
+                    throw new ArgumentNullException(value, "The name must not contain numbers.");
                 }
+
+                author = value;
             }
         }
 

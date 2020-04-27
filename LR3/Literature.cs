@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LR3
 {
-    class Literature : Composition, IComparable<Literature>
+    abstract class Literature : Composition, IComparable<Literature>, IBook
     {
         protected int pages;
         protected int year;
@@ -15,8 +13,8 @@ namespace LR3
             base(title, author)
         {
 
-            this.pages = pages;
-            this.year = year;
+            this.Pages = pages;
+            this.Year = year;
         }
 
         public Literature() :
@@ -27,10 +25,12 @@ namespace LR3
         {
             set
             {
-                if (value >= 0 || value < 10000)
+                if (value <= 0 || value > 10000)
                 {
-                    pages = value;
+                    throw new ArgumentNullException(Convert.ToString(value), "Invalid page count.");
                 }
+
+                pages = value;
             }
         }
 
@@ -38,16 +38,20 @@ namespace LR3
         {
             set
             {
-                if (value > 1500 || value <= nowYear.Year)
+                if (value < 868 || value >= nowYear.Year)
                 {
-                    year = value;
+                    throw new ArgumentNullException(Convert.ToString(value), "Invalid book creation year.");
                 }
+
+                year = value;
             }
         }
 
         int IComparable<Literature>.CompareTo(Literature item) => this.Title.CompareTo(item.Title);
 
         public override string ToString() => $"{title,-55} {author,-40} {pages,-10} {year,-10}";
+
+        public abstract decimal CalculateTheCost();
     }
 }
 

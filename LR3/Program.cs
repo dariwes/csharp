@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace LR3
 {
+    enum State
+    {
+        Rating,
+        Language,
+        Illustration
+    }
+
     class Program
     {
-        enum State
-        {
-            Rating,
-            Language,
-            Illustration
-        }
         static void Main(string[] args)
         {
-
             var books = new List<Literature>()
             {
                 new Fiction("Pride and Prejudice", "Jane Austen", 416, 1797, 4.9),
@@ -35,41 +35,44 @@ namespace LR3
         };
 
             var library = new Library();
-            foreach(var book in books)
+            foreach (var book in books)
             {
-                library.AddBook(book);
+                library.AddBook(0, book);
             }
+
+            Action ShowedInfo = delegate
+            {
+                var count = 1;
+                Console.WriteLine($"{"",-22} Title {"", -35} Author {"", -20} Pages {"", -6} Year {"", -3} Rat/Len/Ill");
+
+                foreach (var book in library)
+                {
+                    Console.WriteLine($"{count++, 2}. " + book);
+                }
+            };
 
             while (true)
             {
                 var choice = Menu(@$"
-                                   Enter (L) Print All Books.
+                                   Enter (P) Print all books.
                                    Enter (O) to Find out the cost of the book.
-                                   Enter (A) sort books alphabetically.
+                                   Enter (A) sort books Alphabetically.
                                    Enter (F) to go to Fiction books.
                                    Enter (S) to go to Science books.
                                    Enter (C) to go to Children's books.
-                                   Enter (E) to Exit", "lafscoe");
+                                   Enter (E) to Exit", "pafscoe");
 
                 var flag = true;
-                var count = 1;
 
                 while (flag)
                 {
                     switch (choice)
                     {
-                        case 'l':
+                        case 'p':
 
                             Console.ForegroundColor = ConsoleColor.DarkGreen;
-                            Console.WriteLine($"{"",-22} Title {"",-35} Author {"",-20} Pages {"",-6} Year {"", -3} Rat/Len/Ill");
 
-                            count = 1;
-
-                            foreach (var book in library)
-                            {
-                                Console.WriteLine($"{count++, 2}. " + book);
-                            }
-
+                            ShowedInfo();
                             flag = false;
 
                             Console.ResetColor();
@@ -77,16 +80,13 @@ namespace LR3
 
                         case 'a':
 
+                            Console.ForegroundColor = ConsoleColor.Blue;
+
                             library.SortBook();
-                            count = 1;
-
-                            foreach (var book in library)
-                            {
-                                Console.WriteLine($"{count++, 2}. " + book);
-                            }
-
+                            ShowedInfo();
                             flag = false;
 
+                            Console.ResetColor();
                             break;
 
                         case 'f':
@@ -96,7 +96,7 @@ namespace LR3
                                    Enter (N) to enter New book.
                                    Enter (D) to Delete book.
                                    Enter (R) to arrange books in descending order of Rating.
-                                   Enter (E) to Exit", "lndre"), library, State.Rating);
+                                   Enter (E) to Exit", "lndre"), library, State.Rating, ShowedInfo);
                          
                             break;
 
@@ -107,7 +107,7 @@ namespace LR3
                                    Enter (N) to enter New book.
                                    Enter (D) to Delete book.
                                    Enter (T) to find out the Time it took to read the book.
-                                   Enter (E) to Exit", "lndte"), library, State.Language);
+                                   Enter (E) to Exit", "lndte"), library, State.Language, ShowedInfo);
 
                             break;
 
@@ -117,7 +117,7 @@ namespace LR3
                                    Enter (L) to List books.
                                    Enter (N) to enter New book.
                                    Enter (D) to Delete book.
-                                   Enter (E) to Exit", "lnde"), library, State.Illustration);
+                                   Enter (E) to Exit", "lnde"), library, State.Illustration, ShowedInfo);
 
                             break;
 
@@ -158,11 +158,11 @@ namespace LR3
                 {
                     flag = Convert.ToChar(Console.ReadLine());
                 }
-                catch (Exception ex)
+                catch (FormatException ex)
                 {
                     Console.WriteLine($"Error: {ex.Message}");
                 }
-                if (letters.Contains(Char.ToLower(flag)))
+                if (letters.Contains(flag = Char.ToLower(flag)))
                 {
                     break;
                 }
@@ -171,8 +171,8 @@ namespace LR3
             return flag;
         }
 
-        static (bool, Library) SelectOperation<T>(char choice, Library library, State state) 
-            where T : Literature, new()
+        static (bool, Library) SelectOperation<T>(char choice, Library library, 
+                        State state, Action ShowedInfo) where T : Literature, new()
         {
             switch (choice)
             {
@@ -180,16 +180,8 @@ namespace LR3
 
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"{"",-22} Title {"",-35} Author {"",-20} Pages {"",-6} Year  {state, 10}");
-                    var count = 1;
-                    
-                    foreach (var book in library)
-                    {
-                        if (book is T)
-                        {
-                            Console.WriteLine($"{count++, 2}. " + book);
-                        }
-                    }
+
+                    ShowedInfo();
 
                     Console.ResetColor();
                     break;
@@ -199,7 +191,8 @@ namespace LR3
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Green;
 
-                    library.AddBook(CreateNewBook<T>(state));
+                    library.Added += CreateNewBook<T>;
+                    library.AddBook(state);
 
                     Console.ResetColor();
                     break;
@@ -208,10 +201,25 @@ namespace LR3
 
                     Console.ForegroundColor = ConsoleColor.Magenta;
 
-                    Console.WriteLine("Which account book do you want to delete?");
-                    string title = Console.ReadLine();
+                    library.Deleted += delegate
+                    {
+                        Console.WriteLine("Which account book do you want to delete?");
+                        string title = Console.ReadLine();
+                        return title;
+                    };
 
-                    library.RemoveBook(title);
+                    try
+                    {
+                        library.RemoveBook();
+                    }
+                    catch(ArgumentNullException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    catch (FormatException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
 
                     Console.ResetColor();
                     break;
@@ -221,11 +229,14 @@ namespace LR3
                     Console.ForegroundColor = ConsoleColor.Magenta;
    
                     Console.WriteLine("For which book do you want to calculate the reading time?");
-                    title = Console.ReadLine();
+                    string title = Console.ReadLine();
 
                     Console.Write("If you really try, you can read this book in ");
 
-                    ((Science)library[title])?.Timing();
+                    if (library[title] is Science)
+                    {
+                        ((Science)library[title])?.Timing();
+                    }
 
                     Console.ResetColor();
                     break;
@@ -236,7 +247,7 @@ namespace LR3
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
                 
                     var fictionBook= new List<Fiction>();
-                    count = 1;
+                    var count = 1;
 
                     foreach (var book in library)
                     {
@@ -275,44 +286,25 @@ namespace LR3
 
             try
             {
+                Console.WriteLine("Enter a title for the book:");
                 book.Title = Console.ReadLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
 
-            Console.WriteLine("Enter the author of the book:");
-
-            try
-            {
+                Console.WriteLine("Enter the author of the book:");
                 book.Author = Console.ReadLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-
-            Console.WriteLine("Enter the number of pages in the book:");
-
-            try
-            {
+            
+                Console.WriteLine("Enter the number of pages in the book:");
                 book.Pages = Convert.ToInt32(Console.ReadLine());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-
-            Console.WriteLine("Enter the year the book was published:");
-
-            try
-            {
+            
+                Console.WriteLine("Enter the year the book was published:");
                 book.Year = Convert.ToInt32(Console.ReadLine());
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+            }
+            catch(ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             switch (state)
@@ -333,9 +325,13 @@ namespace LR3
             {
                 fiction.Rating = Convert.ToDouble(Console.ReadLine());
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return fiction;
@@ -343,16 +339,19 @@ namespace LR3
 
         static Literature IndividualInfo(Science science)
         {
-            Console.WriteLine("Enter book language(0 - rus, other numbers  - eng):");
+            Console.WriteLine("Enter book language(\"rus\" or \"eng\"):");
 
             try
             {
-                int temp = Convert.ToInt32(Console.ReadLine());
-                science.Language = temp == 0 ? "rus" : "eng";
+                science.Language = Console.ReadLine();
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+            }
+            catch(ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return science;
@@ -360,14 +359,13 @@ namespace LR3
 
         static Literature IndividualInfo(Children child)
         {
-            Console.WriteLine("Book with illustrations?(1 - yes, other numbers - no)");
+            Console.WriteLine("Book with illustrations?(true or false)");
 
             try
             {
-                int temp = Convert.ToInt32(Console.ReadLine());
-                child.Illustration = temp == 1 ? true : false;
+                child.Illustration = Convert.ToBoolean(Console.ReadLine());
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
