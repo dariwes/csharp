@@ -13,8 +13,8 @@ namespace LR3
             base(title, author)
         {
 
-            this.Pages = pages;
-            this.Year = year;
+            Pages = pages;
+            Year = year;
         }
 
         public Literature() :

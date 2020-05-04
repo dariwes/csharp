@@ -37,8 +37,19 @@ namespace LR3
             var library = new Library();
             foreach (var book in books)
             {
-                library.AddBook(0, book);
+                library.AddBook(book);
             }
+
+            library.Added += delegate (string message)
+            {
+                Console.WriteLine(message);
+            };
+
+            library.Deleted += delegate (string message)
+            {
+                Console.WriteLine(message);
+                Console.WriteLine("There are {0} books left in the library.", books.Count);
+            };
 
             Action ShowedInfo = delegate
             {
@@ -174,6 +185,8 @@ namespace LR3
         static (bool, Library) SelectOperation<T>(char choice, Library library, 
                         State state, Action ShowedInfo) where T : Literature, new()
         {
+            string title = "";
+
             switch (choice)
             {
                 case 'l':
@@ -191,8 +204,7 @@ namespace LR3
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Green;
 
-                    library.Added += CreateNewBook<T>;
-                    library.AddBook(state);
+                    library.AddBook(CreateNewBook<T>(state)); 
 
                     Console.ResetColor();
                     break;
@@ -200,17 +212,11 @@ namespace LR3
                 case 'd':
 
                     Console.ForegroundColor = ConsoleColor.Magenta;
-
-                    library.Deleted += delegate
-                    {
-                        Console.WriteLine("Which account book do you want to delete?");
-                        string title = Console.ReadLine();
-                        return title;
-                    };
+                    Console.Write("Enter the name of the book you want to delete: ");
 
                     try
                     {
-                        library.RemoveBook();
+                        library.RemoveBook(Console.ReadLine());
                     }
                     catch(ArgumentNullException ex)
                     {
@@ -229,7 +235,7 @@ namespace LR3
                     Console.ForegroundColor = ConsoleColor.Magenta;
    
                     Console.WriteLine("For which book do you want to calculate the reading time?");
-                    string title = Console.ReadLine();
+                    title = Console.ReadLine();
 
                     Console.Write("If you really try, you can read this book in ");
 
@@ -282,7 +288,7 @@ namespace LR3
         {
             Literature book = new T();
 
-            Console.WriteLine("So, please..\nEnter a title for the book:");
+            Console.WriteLine("So, please..\nE");
 
             try
             {

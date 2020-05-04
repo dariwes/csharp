@@ -13,8 +13,8 @@ namespace LR3
 
         public string Title { get; set; }
 
-        public event Func<State, Literature> Added;
-        public event Func<string> Deleted;
+        public event Action<string> Added;
+        public event Action<string> Deleted;
 
         public Literature this[string title]
         {
@@ -25,22 +25,19 @@ namespace LR3
             }
         }
 
-        public void AddBook(State state, Literature book = null)
+        public void AddBook(Literature book)
         {
             if (book is null)
             {
-                book = Added?.Invoke(state);
+                throw new FormatException("Adding a book isn't possible.");
             }
-            
+
             books.Add(book);
-            Added = null;
+            Added?.Invoke("Book added.");
         }
 
-        public void RemoveBook()
+        public void RemoveBook(string title)
         {
-            string title = Deleted?.Invoke();
-            Deleted = null;
-
             var book = books.FirstOrDefault(item => item.Title == title);
 
             if(book is null)
@@ -49,6 +46,7 @@ namespace LR3
             }
 
             books.Remove(book);
+            Deleted?.Invoke("Book deleted.");
         }
 
         public void SortBook()
